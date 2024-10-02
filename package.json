@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "undo-rm",
+  "title": "Undo RM",
+  "description": "Undo RM is a powerful command-line extension designed to protect you from accidental file deletions. By replacing the traditional rm command, it moves deleted files to a designated trash folder, allowing for easy recovery when mistakes happen.\n\nWith Undo RM, you can simply use the trash command to safely delete files or directories, ensuring they are stored in a hidden trash directory instead of being permanently lost. When you need to recover a deleted item, the recover command allows you to restore files with just a few prompts, even handling conflicts if the original file exists.\n\nWhether you’ve mistakenly deleted a document or want to retrieve multiple versions of the same file, Undo RM provides a user-friendly interface to select and restore your data. Say goodbye to the fear of permanent deletions—Undo RM empowers you to manage your files with confidence and ease!",
+  "icon": "extension-icon.png",
+  "author": "vxirau",
+  "owner": "projectk",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "undo-rm",
+      "title": "Undo RM",
+      "subtitle": "Effortlessly recover deleted files and protect your data from accidental loss.",
+      "description": "",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
