@@ -3,7 +3,7 @@ import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import path from "path";
 
 // Import modules and utilities
-import { TrashFile, getTrashFiles, isImageFile, toFileURI, isTextOrCodeFile, readFileContent, isPDFFile, convertPDFToImage } from "./utils/trash"; 
+import { TrashFile, getTrashFiles, isImageFile, toFileURI, isTextOrCodeFile, readFileContent, emptyTrash } from "./utils/trash"; 
 import { recoverFile, deleteFilePermanently } from "./utils/fileOperations";
 import { revealOriginalPath, revealTrashedPath } from "./utils/actions";
 
@@ -154,6 +154,15 @@ export default function Command() {
                     icon={Icon.Trash}
                   />
                 </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    title="Empty all trash"
+                    style={Action.Style.Destructive}
+                    onAction={() => emptyTrash(setTrashFiles)}
+                    icon={Icon.Trash}
+                  />
+                </ActionPanel.Section>
+             
               </ActionPanel>
             }
           />

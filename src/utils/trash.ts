@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
-import { environment } from "@raycast/api";
+import { environment, ActionPanel, Action, Icon, showToast, Toast, confirmAlert } from "@raycast/api";
+
 
 
 // Define the trash directory and metadata file path
@@ -18,6 +19,52 @@ export interface TrashFile {
   isDirectory: boolean;
   size: number;
   mtime: Date;
+}
+
+// Function to empty the trash folder
+export function emptyTrash(setTrashFiles: (files: TrashFile[]) => void) {
+  // Confirm the action
+  confirmAlert({
+    title: "Empty Trash",
+    message: "Are you sure you want to permanently delete all files in the trash?",
+    primaryAction: {
+      title: "Yes, Empty Trash",
+      onAction: () => {
+        try {
+          // Read all files in the trash directory
+          const files = fs.readdirSync(TRASH_DIR);
+          
+          // Loop through and delete each file
+          for (const file of files) {
+            const filePath = path.join(TRASH_DIR, file);
+            if (fs.statSync(filePath).isDirectory()) {
+              fs.rmSync(filePath, { recursive: true, force: true }); // Updated to fs.rmSync
+            } else {
+              fs.unlinkSync(filePath);
+            }
+          }
+
+          // Clear the trash files state
+          setTrashFiles([]);
+
+          // Show success toast
+          showToast({
+            style: Toast.Style.Success,
+            title: "Trash Emptied",
+            message: "All files have been permanently deleted.",
+          });
+        } catch (error) {
+          console.error("Error emptying trash:", error);
+          // Show error toast if there's a problem
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to Empty Trash",
+            message: "An error occurred while emptying the trash.",
+          });
+        }
+      },
+    },
+  });
 }
 
 export function getTrashFiles(): TrashFile[] {
