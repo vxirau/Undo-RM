@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
+import fs from "fs";
 import path from "path";
 
 // Import modules and utilities
@@ -7,21 +8,23 @@ import { TrashFile, getTrashFiles, isImageFile, toFileURI, isTextOrCodeFile, rea
 import { recoverFile, deleteFilePermanently } from "./utils/fileOperations";
 import { revealOriginalPath, revealTrashedPath } from "./utils/actions";
 
-const ASSET_PATH = "/path/to/your/project/assets/";
+const ASSET_PATH = "../assets/";
 const PLACEHOLDERS = {
-  docx: `${ASSET_PATH}docx.png`,
-  ppt: `${ASSET_PATH}ppt.png`,
-  xlsx: `${ASSET_PATH}xlsx.png`,
-  pdf: `${ASSET_PATH}pdf.png`,
-  folder: `${ASSET_PATH}folder.png`,
-  csv: `${ASSET_PATH}csv.png`,
-  music: `${ASSET_PATH}music.png`,
-  archive: `${ASSET_PATH}archive.png`,
-  diskImage: `${ASSET_PATH}disk_image.png`,
-  executable: `${ASSET_PATH}executable.png`,
-  empty: `${ASSET_PATH}empty.png`,
-  unknown: `${ASSET_PATH}unknown.png`,
+  docx: `${ASSET_PATH}docx.png`,          
+  ppt: `${ASSET_PATH}ppt.png`,            
+  xlsx: `${ASSET_PATH}xlsx.png`,          
+  csv: `${ASSET_PATH}csv.png`,            
+  music: `${ASSET_PATH}music.png`,        
+  unknown: `${ASSET_PATH}empty.png`,      
+  empty: `${ASSET_PATH}empty.png`,        
+  pdf: `${ASSET_PATH}pdf.png`,            
+  folder: `${ASSET_PATH}folder.png`,      
+  archive: `${ASSET_PATH}archive.png`,    
+  diskImage: `${ASSET_PATH}disk.png`,     
+  executable: `${ASSET_PATH}exec.png`,    
 };
+
+const TRASH_PATH = path.join(process.env.HOME || "", ".rm_trash");
 
 function getPlaceholder(fileName: string, isDirectory: boolean): string {
   if (isDirectory) return PLACEHOLDERS.folder;
@@ -67,9 +70,16 @@ function formatFileSize(bytes: number): string {
 export default function Command() {
   // State to hold trash files
   const [trashFiles, setTrashFiles] = useState<TrashFile[]>([]);
+  const [trashExists, setTrashExists] = useState<boolean>(true);
 
   // Load trash files on component mount
   useEffect(() => {
+    // Check if the trash directory exists
+    if (!fs.existsSync(TRASH_PATH)) {
+      setTrashExists(false);
+      return;
+    }
+
     const loadTrashFiles = () => {
       const files = getTrashFiles();
       setTrashFiles(files);
@@ -80,7 +90,23 @@ export default function Command() {
   // Render the Raycast UI
   return (
     <List isShowingDetail>
-      {trashFiles.length > 0 ? (
+      {!trashExists ? (
+        <List.Item
+          title="Trash Directory Not Found"
+          subtitle={`Please create a trash directory at ${TRASH_PATH}`}
+          icon={Icon.ExclamationMark}
+          detail={
+            <List.Item.Detail
+              markdown={`**Instructions to Create Trash Directory:**
+
+\`\`\`bash
+mkdir -p ${TRASH_PATH}
+\`\`\`
+`}
+            />
+          }
+        />
+      ) : trashFiles.length > 0 ? (
         trashFiles.map((file) => (
           <List.Item
             key={file.trashedName}
@@ -88,13 +114,13 @@ export default function Command() {
             icon={file.isDirectory ? Icon.Folder : Icon.Document}
             detail={
               <List.Item.Detail
-              markdown={
-                isImageFile(file.originalName)
-                  ? `<img src="${toFileURI(file.trashedPath)}" alt="Image Preview" width="150" height="150" />`
-                  : isTextOrCodeFile(file.originalName) && file.size > 0 ?
-                  `### ${file.originalName}\n\n\`\`\`${path.extname(file.originalName).slice(1)}\n${readFileContent(file.trashedPath)}\n\`\`\``
-                  : `<img src="${getPlaceholder(file.originalName, file.isDirectory)}" alt="File Placeholder" width="150" height="150" />`
-              }
+                markdown={
+                  isImageFile(file.originalName)
+                    ? `<img src="${toFileURI(file.trashedPath)}" alt="Image Preview" width="150" height="150" />`
+                    : isTextOrCodeFile(file.originalName) && file.size > 0 ?
+                    `### ${file.originalName}\n\n\`\`\`${path.extname(file.originalName).slice(1)}\n${readFileContent(file.trashedPath)}\n\`\`\``
+                    : `<img src="${getPlaceholder(file.originalName, file.isDirectory)}" alt="File Placeholder" width="150" height="150" />`
+                }
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label
@@ -124,7 +150,6 @@ export default function Command() {
               />
             }
             actions={
-              
               <ActionPanel>
                 <Action
                   title="Recover File"
@@ -162,7 +187,6 @@ export default function Command() {
                     icon={Icon.Trash}
                   />
                 </ActionPanel.Section>
-             
               </ActionPanel>
             }
           />
